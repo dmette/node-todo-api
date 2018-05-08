@@ -1,7 +1,8 @@
 require('./config/config');
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -63,6 +64,22 @@ app.delete('/todos/:id', (req,res) =>{
       res.status(400).send();
   })
 });
+
+app.post('/users', (req,res) =>{
+  var user = new User({
+    email: req.body.email,
+    password: req.body.password
+  });
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch((err) => {
+  res.status(400).send(err);
+
+})
+});
+
 
 app.listen(port, () => {
   console.log(`started on ${port}`);
